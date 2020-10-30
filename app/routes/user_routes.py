@@ -15,21 +15,26 @@ def get_user(current_user):
     user['experiences'] = WorkExperience().get_user_experiences(current_user['_id'])
     user['achievements'] = Achievement().get_user_achievements(current_user['_id'])
     user['certificates'] = Certificate().get_user_certificates(current_user['_id'])
-    return flask.jsonify(user), 200
+    return flask.jsonify(user)
 
 @app.route('/user', methods=['PUT'])
 @token_required
 def update_user(current_user):
-    data = flask.request.get_json()
-
-    print(flask.request.files['avatar'])
-    print(save_pic(flask.request.files['avatar']))
+    data = dict(flask.request.form)
+    avatar_name = save_pic(flask.request.files['avatar'])
+    if type(avatar_name) == dict and 'error' in avatar_name:
+        return {
+            'error': 'Bad request',
+            'message': avatar_name['message']
+        }, 400
+    data['image_path'] = flask.request.host_url+'static/'+avatar_name
     return {
-        'msg': 'Done', 
-        **data,
-        'file': flask.request.host_url + 'static/'+ save_pic(flask.request.files['avatar'])
-        }
+        **data
+        }, 201
 
 @app.route('/users')
 def users():
-    return dumps(list(User().get_users()))
+    return User().get_users()
+
+def confirm_account():
+    pass

@@ -12,6 +12,13 @@ def get_hobbies(current_user):
         Hobby().get_user_hobbies(current_user['_id'])
     )
 
+@app.route('/hobbies/<id>')
+@token_required
+def get_hobby(current_user, id):
+    return flask.jsonify(
+        Hobby().get_hobby(id)
+    )
+
 @app.route('/hobbies', methods=['POST'])
 @token_required
 def create_hobby(current_user):
@@ -26,7 +33,7 @@ def create_hobby(current_user):
         'user_id': current_user['_id']
     }
     h=Hobby().create_hobby(**payload)
-    return flask.jsonify(h), 200
+    return payload, 201
 
 @app.route('/hobbies/<id>', methods=['DELETE'])
 @token_required
@@ -50,4 +57,5 @@ def edit_hobby(current_user, id):
             'error': 'Bad request',
             'message': 'that hobby already exist for the user'
         }), 400
-    return flask.jsonify(Hobby().edit_hobby(id, payload))
+    Hobby().edit_hobby(id, payload)
+    return '', 204

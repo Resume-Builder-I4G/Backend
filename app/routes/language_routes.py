@@ -11,6 +11,13 @@ def get_languages(current_user):
         Language().get_user_languages(current_user['_id'])
     )
 
+@app.route('/languages/<id>')
+@token_required
+def get_language(current_user):
+    return flask.jsonify(
+        Language().get_language(id)
+    )
+
 @app.route('/languages', methods=['POST'])
 @token_required
 def create_language(current_user):
@@ -25,7 +32,7 @@ def create_language(current_user):
         'user_id': current_user['_id']
     }
     l=Language().create_language(**payload)
-    return flask.jsonify(l), 200
+    return flask.jsonify(payload), 201
 
 @app.route('/languages/<id>', methods=['DELETE'])
 @token_required
@@ -49,4 +56,5 @@ def edit_language(current_user, id):
             'error': 'Bad request',
             'message': 'that language already exist for the user'
         }), 400
-    return flask.jsonify(Language().edit_language(id, payload))
+    Language().edit_language(id, payload)
+    return '', 204

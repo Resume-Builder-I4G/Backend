@@ -6,9 +6,16 @@ from app.routes import token_required
 
 @app.route('/education')
 @token_required
-def get_education(current_user):
+def get_educations(current_user):
     return flask.jsonify(
         Education().get_user_educations(current_user['_id'])
+    )
+
+@app.route('/education/<id>')
+@token_required
+def get_education(current_user, id):
+    return flask.jsonify(
+        Education().get_education(id)
     )
 
 @app.route('/education', methods=['POST'])
@@ -32,7 +39,7 @@ def create_education(current_user):
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
     e=Education().create_education(**data)
-    return flask.jsonify(e), 200
+    return data, 201
 
 @app.route('/education/<id>', methods=['DELETE'])
 @token_required
@@ -47,4 +54,5 @@ def edit_education(current_user, id):
         return flask.jsonify({
             'error': 'Bad request'
         }), 400
-    return flask.jsonify(Education().edit_education(id, payload)), 200
+    Education().edit_education(id, payload)
+    return '', 204

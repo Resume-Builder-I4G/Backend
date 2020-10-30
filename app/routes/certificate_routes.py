@@ -11,13 +11,20 @@ def get_certificates(current_user):
         Certificate().get_user_certificates(current_user['_id'])
     )
 
+@app.route('/certificate/<id>')
+@token_required
+def get_certificate(current_user, id):
+    return flask.jsonify(
+        Certificate().get_certificate(id)
+    )
+
 @app.route('/certificate', methods=['POST'])
 @token_required
 def create_certificate(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
     c=Certificate().create_certificate(**payload)
-    return flask.jsonify(e), 200
+    return payload, 201
 
 @app.route('/Certificate/<id>', methods=['DELETE'])
 @token_required
@@ -28,6 +35,7 @@ def delete_certificate(current_user, id):
 @app.route('/Certificate/<id>', methods=['PUT'])
 @token_required
 def edit_certificate(current_user, id):
+    payload = flask.request.get_json()
     if 'course' not in payload or 'school' not in payload:
         return flask.jsonify({
             'error': 'Bad request'
@@ -40,4 +48,5 @@ def edit_certificate(current_user, id):
             'error': 'Bad request',
             'message': 'that name already exist for the user'
         }), 400
-    return flask.jsonify(Certificate().edit_certificate(id, payload))
+    Certificate().edit_certificate(id, payload)
+    return '', 204

@@ -8,7 +8,7 @@ MONGODB_URI = os.environ.get('MONGODB_URI')
 
 app = flask.Flask(__name__)
 app.config['SECRET_KEY']=os.environ.get('SECRET_KEY')
-mongo = MongoClient(MONGODB_URI)
+mongo =MongoClient(MONGODB_URI)
 db = mongo.resume
 
 CORS(app)

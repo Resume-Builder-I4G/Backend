@@ -11,6 +11,13 @@ def get_skills(current_user):
         Skill().get_user_skills(current_user['_id'])
     )
 
+@app.route('/skills/<id>')
+@token_required
+def get_skill(current_user, id):
+    return flask.jsonify(
+        Skill().get_skill(id)
+    )
+
 @app.route('/skills', methods=['POST'])
 @token_required
 def create_skill(current_user):
@@ -25,13 +32,13 @@ def create_skill(current_user):
         'user_id': current_user['_id']
     }
     s=Skill().create_skill(**payload)
-    return flask.jsonify(s), 200
+    return flask.jsonify(payload), 201
 
 @app.route('/skills/<id>', methods=['DELETE'])
 @token_required
 def delete_skill(current_user, id):
     Skill().delete_skill(id)
-    return '', 204
+    return '', 201
 
 @app.route('/skills/<id>', methods=['PUT'])
 @token_required
@@ -49,4 +56,5 @@ def edit_skill(current_user, id):
             'error': 'Bad request',
             'message': 'that skill already exist for the user'
         }), 400
-    return flask.jsonify(Skill().edit_skill(id, payload))
+    flask.jsonify(Skill().edit_skill(id, payload))
+    return payload

@@ -6,9 +6,16 @@ from app.routes import token_required
 
 @app.route('/experience')
 @token_required
-def get_experience(current_user):
+def get_experiences(current_user):
     return flask.jsonify(
         WorkExperience().get_user_experiences(current_user['_id'])
+    )
+
+@app.route('/experience/<id>')
+@token_required
+def get_experience(current_user, id):
+    return flask.jsonify(
+        WorkExperience().get_work(id)
     )
 
 @app.route('/experience', methods=['POST'])
@@ -32,7 +39,7 @@ def create_experience(current_user):
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
     w=WorkExperience().create_work(**data)
-    return flask.jsonify(w), 200
+    return data, 201
 
 @app.route('/experience/<id>', methods=['DELETE'])
 @token_required
@@ -43,8 +50,10 @@ def delete_experience(current_user, id):
 @app.route('/experience/<id>', methods=['PUT'])
 @token_required
 def edit_experience(current_user, id):
+    payload = flask.request.get_json()
     if 'title' not in payload or 'company' not in payload:
         return flask.jsonify({
             'error': 'Bad request'
         }), 400
-    return flask.jsonify(WorkExperience().edit_work(id, payload))
+    WorkExperience().edit_work(id, payload)
+    return '', 204
