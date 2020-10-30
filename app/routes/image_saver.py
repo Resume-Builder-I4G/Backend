@@ -1,3 +1,4 @@
+'''Helper module that saves the avatar of the  user to disc and returns the filename'''
 from PIL import Image
 import os, secrets
 from app import app

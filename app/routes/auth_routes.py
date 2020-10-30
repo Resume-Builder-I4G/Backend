@@ -1,3 +1,4 @@
+'''Module that handles view of everything that has to do with authN and authZ'''
 from werkzeug.security import (generate_password_hash, 
                     check_password_hash)
 import flask, jwt
@@ -43,5 +44,5 @@ def signin():
     token = jwt.encode({'user': u}, app.config['SECRET_KEY'])
     return flask.jsonify({
         'token': token.decode('utf-8'),
-        user: u
+        'user': u
     }), 200

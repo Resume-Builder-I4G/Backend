@@ -1,3 +1,4 @@
+'''API Application'''
 import flask, os
 from pymongo import MongoClient
 from werkzeug.http import HTTP_STATUS_CODES

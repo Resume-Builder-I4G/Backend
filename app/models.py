@@ -1,7 +1,7 @@
 import os, datetime, uuid
 from bson.json_util import dumps
 from werkzeug.security import generate_password_hash, check_password_hash
-from app import db
+from app import db, app
 
 class User:
     def __init__(self):
@@ -22,8 +22,7 @@ class User:
         # get user with email if any
         # check if password is same
         user = dumps(self.db.find_one({'email': email}))
-        print(user, self.db.find_one({'email': email}))
-        if user and check_password_hash(user.password_hash, password):
+        if user and check_password_hash(user['password_hash'], password):
             return user
         else:
             return {'error': 'Invalid email or password'}
@@ -32,12 +31,13 @@ class User:
         return dumps(list(self.db.find()))
     
     def get_user(self, id):
-        return dumps(self.db.find_by_id(id))
+        return dumps(self.db.find_one({'_id':id}))
     
-    def update_profile(self, **kwargs):
+    def update_profile(self, id, **kwargs):
         # find user with email, and update the account
         # city, phone, about, current_template, avatar, state, country
-        pass
+        user = self.db.find_one_and_update({'_id': id}, kwargs)
+        return dumps(user)
     
 class Skill:
     def __init__(self):
@@ -53,6 +53,9 @@ class Skill:
         })
         return dumps(skill)
     
+    def get_skill(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_skills(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
     
@@ -71,16 +74,19 @@ class Hobby:
     def __init__(self):
         self.db = db.hobbies
 
-    def create_hobby(self, name, level, user_id):
+    def create_hobby(self, name, user_id):
         hobby = {
             '_id': uuid.uuid4().hex,
-            'name': name, 'level': int(level)
+            'name': name
         }
         hobby = self.db.insert_one({
             **hobby, 'user_id': user_id
         })
         return dumps(hobby)
     
+    def get_hobby(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_hobbies(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
 
@@ -103,13 +109,15 @@ class Language:
             '_id': uuid.uuid4().hex, 'name': name, 
             'proficiency': proficiency
         }
-        # create the hobby model.
-        # add the hobby model to the auth user
+        # create the hobby model and add the hobby model to the auth user
         language = self.db.insert_one({
             **language, 'user_id': user_id
         })
         return dumps(language)
     
+    def get_language(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_languages(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
     
@@ -138,6 +146,9 @@ class Certificate:
         })
         return dumps(certificate)
     
+    def get_certificate(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_certificates(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
     
@@ -166,6 +177,9 @@ class Achievement:
         })
         return dumps(achievement)
     
+    def get_achievement(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_achievements(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
     
@@ -197,6 +211,9 @@ class WorkExperience:
         })
         return dumps(work)
     
+    def get_work(self, id):
+        return dumps(self.db.find_one({'_id':id}))
+
     def get_user_experiences(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
     
@@ -228,6 +245,9 @@ class Education:
             **education, 'user_id': user_id
         })
         return dumps(education)
+
+    def get_education(self, id):
+        return dumps(self.db.find_one({'_id':id}))
 
     def get_user_educations(self, user_id):
         return dumps(list(self.db.find({'user_id': user_id})))
