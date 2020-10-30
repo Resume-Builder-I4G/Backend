@@ -1,0 +1,1 @@
+'''Module that handles view of everything that has to do with mailing'''

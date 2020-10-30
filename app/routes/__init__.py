@@ -1,4 +1,7 @@
+'''Routes handler package for the API'''
 import flask, jwt
+from app import app
+from app.models import User
 
 from functools import wraps
 
@@ -15,12 +18,13 @@ def token_required(f):
                 }), 403
         try:
             data=jwt.decode(token, app.config['SECRET_KEY'])
-            current_user=User().get_user(data['_id'])
+            print(data)
+            current_user=User().get_user(data['user']['_id'])
         except Exception as e:
             return flask.jsonify({
-                'error': 'Unauthorized',
+                'error': 'Something went wrong',
                 'message': str(e)
-                }), 403
+                }), 500
 
         return f(current_user, *args, **kwargs)
 
