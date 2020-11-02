@@ -32,17 +32,18 @@ def create_skill(current_user):
         'user_id': current_user['_id']
     }
     s=Skill().create_skill(**payload)
-    return flask.jsonify(payload), 201
+    return s, 201
 
 @app.route('/skills/<id>', methods=['DELETE'])
 @token_required
 def delete_skill(current_user, id):
     Skill().delete_skill(id)
-    return '', 201
+    return '', 204
 
 @app.route('/skills/<id>', methods=['PUT'])
 @token_required
 def edit_skill(current_user, id):
+    payload = flask.request.get_json()
     if 'name' not in payload or 'level' not in payload:
         return flask.jsonify({
             'error': 'Bad request',
@@ -56,5 +57,5 @@ def edit_skill(current_user, id):
             'error': 'Bad request',
             'message': 'that skill already exist for the user'
         }), 400
-    flask.jsonify(Skill().edit_skill(id, payload))
-    return payload
+    s=Skill().edit_skill(id, payload)
+    return s, 201
