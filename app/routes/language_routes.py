@@ -32,7 +32,7 @@ def create_language(current_user):
         'user_id': current_user['_id']
     }
     l=Language().create_language(**payload)
-    return flask.jsonify(payload), 201
+    return l, 201
 
 @app.route('/languages/<id>', methods=['DELETE'])
 @token_required
@@ -43,6 +43,7 @@ def delete_language(current_user, id):
 @app.route('/languages/<id>', methods=['PUT'])
 @token_required
 def edit_language(current_user, id):
+    payload = flask.request.get_json()
     if 'name' not in payload or 'proficiency' not in payload:
         return flask.jsonify({
             'error': 'Bad request',
@@ -56,5 +57,5 @@ def edit_language(current_user, id):
             'error': 'Bad request',
             'message': 'that language already exist for the user'
         }), 400
-    Language().edit_language(id, payload)
-    return '', 204
+    l=Language().edit_language(id, payload)
+    return l, 201

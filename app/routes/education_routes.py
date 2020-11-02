@@ -39,7 +39,7 @@ def create_education(current_user):
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
     e=Education().create_education(**data)
-    return data, 201
+    return e, 201
 
 @app.route('/education/<id>', methods=['DELETE'])
 @token_required
@@ -50,9 +50,10 @@ def delete_education(current_user, id):
 @app.route('/education/<id>', methods=['PUT'])
 @token_required
 def edit_education(current_user, id):
+    payload = flask.request.get_json()
     if 'course' not in payload or 'school' not in payload:
         return flask.jsonify({
             'error': 'Bad request'
         }), 400
-    Education().edit_education(id, payload)
-    return '', 204
+    e=Education().edit_education(id, payload)
+    return e, 201

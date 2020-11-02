@@ -24,7 +24,7 @@ def create_achievement(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
     a=Achievement().create_achievement(**payload)
-    return payload, 201
+    return a, 201
 
 @app.route('/achievement/<id>', methods=['DELETE'])
 @token_required
@@ -36,6 +36,7 @@ def delete_achievement(current_user, id):
 @app.route('/achievement/<id>', methods=['PUT'])
 @token_required
 def edit_achievement(current_user, id):
+    payload = flask.request.get_json()
     if 'course' not in payload or 'school' not in payload:
         return flask.jsonify({
             'error': 'Bad request'
@@ -48,5 +49,5 @@ def edit_achievement(current_user, id):
             'error': 'Bad request',
             'message': 'that name already exist for the user'
         }), 400
-    Achievement().edit_achievement(id, payload)
-    return '', 204
+    a=Achievement().edit_achievement(id, payload)
+    return a, 201

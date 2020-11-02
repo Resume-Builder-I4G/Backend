@@ -19,8 +19,14 @@ def signup():
         'email': payload['email'],
         'password_hash': generate_password_hash(payload['password'])
     }
+    u = User().db.find_one({'email': payload['email']})
+    if u:
+        return flask.jsonify({
+            'error': 'Invalid request',
+            'message': 'email already taken.'
+        }), 400
     u=User().signup(**user)
-    return u, 200
+    return u, 201
 
 @app.route('/auth/signin', methods=['POST'])
 def signin():

@@ -24,7 +24,7 @@ def create_certificate(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
     c=Certificate().create_certificate(**payload)
-    return payload, 201
+    return c, 201
 
 @app.route('/Certificate/<id>', methods=['DELETE'])
 @token_required
@@ -48,5 +48,5 @@ def edit_certificate(current_user, id):
             'error': 'Bad request',
             'message': 'that name already exist for the user'
         }), 400
-    Certificate().edit_certificate(id, payload)
-    return '', 204
+    c=Certificate().edit_certificate(id, payload)
+    return c, 201

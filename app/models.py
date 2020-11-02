@@ -1,5 +1,5 @@
 import os, datetime, uuid
-from bson.json_util import dumps
+from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash
 from app import db, app
 
@@ -12,11 +12,12 @@ class User:
             '_id': uuid.uuid4().hex,
             'name': name,
             'email': email, 
+            'is_confirmed': False,
             'password_hash': password_hash
         }
         user =  self.db.insert_one(user)
         # create the user model.
-        return list(user)[0]
+        return self.db.find_one({'email': email})
     
     def signin(self, email, password):
         # get user with email if any
@@ -38,6 +39,22 @@ class User:
         # city, phone, about, current_template, avatar, state, country
         user = self.db.find_one_and_update({'_id': id}, kwargs)
         return user
+
+    def get_reset_token(self, current_user, expires_sec=1800):
+        '''Generates a timed token to reset password'''
+        s = Serializer(app.config['SECRET_KEY'], expires_sec)
+        return s.dumps({'user_id': current_user['_id']}).decode('utf-8')
+
+    @staticmethod 
+    def verify_reset_token(token):
+        '''Verifies the timed token generated in the function above'''
+        s = Serializer(app.config['SECRET_KEY'])
+        try:
+            user_id=s.loads(token)['user_id']
+        except:
+            return None
+        return User().db.find_one({'_id': user_id})
+
     
 class Skill:
     def __init__(self):
@@ -51,7 +68,7 @@ class Skill:
         skill = self.db.insert_one({
             **skill, 'user_id': user_id
         })
-        return skill
+        return self.db.find_one({'name': name, 'user_id': user_id})
     
     def get_skill(self, id):
         return self.db.find_one({'_id':id})
@@ -61,8 +78,8 @@ class Skill:
     
     def edit_skill(self, _id, payload):
         # get skill with the _id and update
-        skill = self.db.find_one_and_update({'_id': _id}, payload)
-        return skill
+        skill = self.db.find_one_and_update({'_id': _id}, {'$set': payload})
+        return self.db.find_one(payload)
     
     def delete_skill(self, _id):
         # get skill with the _id and delete
@@ -82,7 +99,7 @@ class Hobby:
         hobby = self.db.insert_one({
             **hobby, 'user_id': user_id
         })
-        return hobby
+        return self.d.find_one({'name': name, 'user_id': user_id})
     
     def get_hobby(self, id):
         return self.db.find_one({'_id':id})
@@ -92,8 +109,8 @@ class Hobby:
 
     def edit_hobby(self, _id, payload):
         # get hobby with the _id and update
-        hobby = self.db.find_one_and_update({'_id': _id}, payload)
-        return hobby
+        hobby = self.db.find_one_and_update({'_id': _id}, {'$set': payload})
+        return self.db.find_one(payload)
     
     def delete_hobby(self, _id):
         # get hobby with the _id and delete
@@ -113,7 +130,7 @@ class Language:
         language = self.db.insert_one({
             **language, 'user_id': user_id
         })
-        return language
+        return self.db.find_one({'name': name, 'user_id': user_id})
     
     def get_language(self, id):
         return self.db.find_one({'_id':id})
@@ -123,8 +140,8 @@ class Language:
     
     def edit_language(self, _id, payload):
         # get language with the _id and update
-        language = self.db.find_one_and_update({'_id': _id}, payload)
-        return language
+        language = self.db.find_one_and_update({'_id': _id}, {'$set':payload})
+        return self.db.find_one(payload)
     
     def delete_language(self, _id):
         # get language with the _id and delete
@@ -144,7 +161,7 @@ class Certificate:
         certificate = self.db.insert_one({
             **certificate, 'user_id': user_id
         })
-        return certificate
+        return self.db.find_one({**payload, 'user_id': user_id})
     
     def get_certificate(self, id):
         return self.db.find_one({'_id':id})
@@ -154,19 +171,19 @@ class Certificate:
     
     def edit_certificate(self, _id, payload):
         # get language with the _id and update
-        certificate = self.db.find_one_and_update({'_id': _id}, payload)
-        return certificate
+        certificate = self.db.find_one_and_update({'_id': _id}, {'$set':payload})
+        return (self.db.find_one(payload))
     
     def delete_certificate(self, _id):
         # get language with the _id and delete
         certificate = self.db.delete_one({'_id': _id})
-        return dumps(certificate)
+        return certificate
 
 class Achievement:
     def __init__(self):
         self.db = db.achievements
 
-    def create_achievement(self, name, proficiency, user_id):
+    def create_achievement(self, payload, user_id):
         achievement = {
             '_id': uuid.uuid4().hex, **payload
         }
@@ -175,7 +192,7 @@ class Achievement:
         achievement = self.db.insert_one({
             **achievement, 'user_id': user_id
         })
-        return achievement
+        return self.db.find_one({**payload, 'user_id': user_id})
     
     def get_achievement(self, id):
         return self.db.find_one({'_id':id})
@@ -185,8 +202,8 @@ class Achievement:
     
     def edit_achievement(self, _id, payload):
         # get language with the _id and update
-        achievement = self.db.find_one_and_update({'_id': _id}, payload)
-        return achievement
+        achievement = self.db.find_one_and_update({'_id': _id}, {'$set': payload})
+        return self.db.find_one(payload)
     
     def delete_language(self, _id):
         # get language with the _id and delete
@@ -209,7 +226,7 @@ class WorkExperience:
         work = self.db.insert_one({
             **work, 'user_id': user_id
         })
-        return work
+        return self.db.find_one({'user_id': user_id, 'title': title, 'company': company})
     
     def get_work(self, id):
         return self.db.find_one({'_id':id})
@@ -219,8 +236,8 @@ class WorkExperience:
     
     def edit_work(self, _id, payload):
         # get work with the _id and update
-        work = self.db.find_one_and_update({'_id': _id}, payload)
-        return work
+        work = self.db.find_one_and_update({'_id': _id}, {'$set': payload})
+        return self.db.find_one({**payload, 'user_id': user_id})
     
     def delete_work(self, _id):
         # get work with the _id and delete
@@ -244,7 +261,7 @@ class Education:
         education = self.db.insert_one({
             **education, 'user_id': user_id
         })
-        return education
+        return self.db.find_one({'school': school, 'course': course, 'user_id': user_id})
 
     def get_education(self, id):
         return self.db.find_one({'_id':id})
@@ -254,8 +271,8 @@ class Education:
     
     def edit_education(self, _id, payload):
         # get education with the _id and update
-        education = self.db.find_one_and_update({'_id': _id}, payload)
-        return education
+        education = self.db.find_one_and_update({'_id': _id}, {'$set': payload})
+        return self.db.find_one({**payload, 'user_id': user_id})
     
     def delete_education(self, _id):
         # get education with the _id and delete

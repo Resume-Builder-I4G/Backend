@@ -39,7 +39,7 @@ def create_experience(current_user):
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
     w=WorkExperience().create_work(**data)
-    return data, 201
+    return w, 201
 
 @app.route('/experience/<id>', methods=['DELETE'])
 @token_required
@@ -55,5 +55,5 @@ def edit_experience(current_user, id):
         return flask.jsonify({
             'error': 'Bad request'
         }), 400
-    WorkExperience().edit_work(id, payload)
-    return '', 204
+    w=WorkExperience().edit_work(id, payload)
+    return w, 201
