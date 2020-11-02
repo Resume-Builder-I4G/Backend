@@ -35,7 +35,7 @@ def update_user(current_user):
 
 @app.route('/users')
 def users():
-    return User().get_users()
+    return flask.jsonify(User().get_users())
 
 @app.route('/confirm', methods=['POST'])
 @token_required

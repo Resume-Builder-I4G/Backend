@@ -31,12 +31,22 @@ def create_skill(current_user):
         'name': payload['name'], 'level': payload['level'],
         'user_id': current_user['_id']
     }
+    if Skill().db.find_one({'user_id': current_user['_id'], 'name': payload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Skill already exist for the user'
+        }), 400
     s=Skill().create_skill(**payload)
     return s, 201
 
 @app.route('/skills/<id>', methods=['DELETE'])
 @token_required
 def delete_skill(current_user, id):
+    if not Skill().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No skill with that id'
+        }, 404
     Skill().delete_skill(id)
     return '', 204
 

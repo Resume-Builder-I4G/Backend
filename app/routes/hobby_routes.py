@@ -32,6 +32,11 @@ def create_hobby(current_user):
         'name': payload['name'],
         'user_id': current_user['_id']
     }
+    if Language().db.find_one({'user_id': current_user['_id'], 'name': payload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Hobby already exist for the user'
+        }), 400
     h=Hobby().create_hobby(**payload)
     return h, 201
 

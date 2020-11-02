@@ -38,6 +38,11 @@ def create_education(current_user):
     if 'description' in payload:
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
+    if Education().db.find_one(data):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Language already exist for the user'
+        }), 400
     e=Education().create_education(**data)
     return e, 201
 

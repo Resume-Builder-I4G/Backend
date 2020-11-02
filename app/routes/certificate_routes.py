@@ -23,6 +23,11 @@ def get_certificate(current_user, id):
 def create_certificate(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
+    if Certificate().db.find_one({'user_id': current_user['_id'], 'name': paload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Language already exist for the user'
+        }), 400
     c=Certificate().create_certificate(**payload)
     return c, 201
 

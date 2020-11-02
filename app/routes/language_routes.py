@@ -31,6 +31,11 @@ def create_language(current_user):
         'name': payload['name'], 'proficiency': payload['proficiency'],
         'user_id': current_user['_id']
     }
+    if Language().db.find_one({'user_id': current_user['_id', 'name': name]}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Language already exist for the user'
+        }), 400
     l=Language().create_language(**payload)
     return l, 201
 
