@@ -43,6 +43,11 @@ def create_hobby(current_user):
 @app.route('/hobbies/<id>', methods=['DELETE'])
 @token_required
 def delete_hobby(current_user, id):
+    if not Hobby().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No hobby with that id'
+        }, 404
     Hobby().delete_hobby(id)
     return '', 204
 

@@ -34,6 +34,11 @@ def create_achievement(current_user):
 @app.route('/achievement/<id>', methods=['DELETE'])
 @token_required
 def delete_achievement(current_user, id):
+    if not Achievement().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     Achievement().delete_achievement(id)
     return '', 204
 

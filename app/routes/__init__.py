@@ -18,7 +18,6 @@ def token_required(f):
                 }), 403
         try:
             data=jwt.decode(token, app.config['SECRET_KEY'])
-            print(data)
             current_user=User().get_user(data['user']['_id'])
         except Exception as e:
             return flask.jsonify({

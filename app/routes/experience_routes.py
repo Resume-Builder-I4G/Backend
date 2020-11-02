@@ -49,6 +49,11 @@ def create_experience(current_user):
 @app.route('/experience/<id>', methods=['DELETE'])
 @token_required
 def delete_experience(current_user, id):
+    if not WorkExperience().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     WorkExperience().delete_work(id)
     return '', 204
 

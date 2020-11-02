@@ -42,6 +42,11 @@ def create_language(current_user):
 @app.route('/languages/<id>', methods=['DELETE'])
 @token_required
 def delete_language(current_user, id):
+    if not Language().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No language with that id'
+        }, 404
     Language().delete_language(id)
     return '', 204
 

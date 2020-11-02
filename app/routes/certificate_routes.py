@@ -34,6 +34,11 @@ def create_certificate(current_user):
 @app.route('/Certificate/<id>', methods=['DELETE'])
 @token_required
 def delete_certificate(current_user, id):
+    if not Certificate().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     Certificate().delete_certificate(id)
     return '', 204
 
