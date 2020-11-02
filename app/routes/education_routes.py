@@ -38,12 +38,22 @@ def create_education(current_user):
     if 'description' in payload:
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
+    if Education().db.find_one(data):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Language already exist for the user'
+        }), 400
     e=Education().create_education(**data)
     return e, 201
 
 @app.route('/education/<id>', methods=['DELETE'])
 @token_required
 def delete_education(current_user, id):
+    if not Education().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No education with that id'
+        }, 404
     Education().delete_education(id)
     return '', 204
 

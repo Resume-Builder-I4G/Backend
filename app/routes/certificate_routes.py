@@ -23,12 +23,22 @@ def get_certificate(current_user, id):
 def create_certificate(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
+    if Certificate().db.find_one({'user_id': current_user['_id'], 'name': paload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Language already exist for the user'
+        }), 400
     c=Certificate().create_certificate(**payload)
     return c, 201
 
 @app.route('/Certificate/<id>', methods=['DELETE'])
 @token_required
 def delete_certificate(current_user, id):
+    if not Certificate().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     Certificate().delete_certificate(id)
     return '', 204
 

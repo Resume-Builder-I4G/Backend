@@ -38,12 +38,22 @@ def create_experience(current_user):
     if 'description' in payload:
         data['desc'] = payload['description']
     data['user_id'] = current_user['_id']
+    if WorkExperience().db.find_one(data):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Work Experience already exist for the user'
+        }), 400
     w=WorkExperience().create_work(**data)
     return w, 201
 
 @app.route('/experience/<id>', methods=['DELETE'])
 @token_required
 def delete_experience(current_user, id):
+    if not WorkExperience().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     WorkExperience().delete_work(id)
     return '', 204
 

@@ -37,7 +37,7 @@ class User:
     def update_profile(self, id, **kwargs):
         # find user with email, and update the account
         # city, phone, about, current_template, avatar, state, country
-        user = self.db.find_one_and_update({'_id': id}, kwargs)
+        user = self.db.find_one_and_update({'_id': id}, {'$set':kwargs})
         return user
 
     def get_reset_token(self, current_user, expires_sec=1800):

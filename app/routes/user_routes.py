@@ -29,19 +29,23 @@ def update_user(current_user):
             'message': avatar_name['message']
         }, 400
     data['image_path'] = flask.request.host_url+'static/'+avatar_name
-    return {
-        **data
-        }, 201
+    User().update_profile(current_user['_id'], **data)
+    return flask.redirect(
+        flask.url_for('get_user', current_user=current_user)
+        ), 201
+
+@app.route('/')
+def home():
+    return flask.redirect('https://www.postman.com/collections/11d9c8bcd44db2b4040c')
 
 @app.route('/users')
 def users():
-    return User().get_users()
+    return flask.jsonify(User().get_users())
 
 @app.route('/confirm', methods=['POST'])
 @token_required
 def confirm_account(current_user):
-    user = User().db.find_one_and_update(current_user, {'$set': {'is_confirmed': True}})
-    print(user)
+    user = User().update_profile(current_user['_id'], {'is_confirmed': True})
     return user, 201
 
 @app.route('/reset_password/<token>', methods=['POST'])
@@ -64,13 +68,11 @@ def reset_password(token):
             'error': 'Bad request',
             'message': 'Invalid data'
         }, 400
-    user = User().db.find_one_and_update(
-            user, 
-            {'$set': 
+    user = User().update_profile(current_user['_id'],
                 {'password_hash': generate_password_hash(data['password'])}
-            })
-    print(user)
-    return user, 201
+            )
+
+    return '', 201
 
 @app.route('/get_password_token', methods=['POST'])
 def get_token():
@@ -95,4 +97,14 @@ def get_token():
         }, 400
     return {'token': User().get_reset_token(user), 'user': user}, 200
 
+@app.route('/templates', methods=['POST'])
+@token_required
+def template(current_user):
+    template = flask.request.get_json()['template']
+    if not template:
+        return {
+            'error': 'Invalid request',
+            'message': 'Template not given'
+        }, 400
+    User().update_profile(current_user['_id'], {'template': template})
     

@@ -23,12 +23,22 @@ def get_achievement(current_user, id):
 def create_achievement(current_user):
     payload = flask.request.get_json()
     payload['user_id'] = current_user['_id']
+    if Achievement().db.find_one({'user_id': current_user['_id'], 'name': payload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Achievement already exist for the user'
+        }), 400
     a=Achievement().create_achievement(**payload)
     return a, 201
 
 @app.route('/achievement/<id>', methods=['DELETE'])
 @token_required
 def delete_achievement(current_user, id):
+    if not Achievement().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No experience with that id'
+        }, 404
     Achievement().delete_achievement(id)
     return '', 204
 

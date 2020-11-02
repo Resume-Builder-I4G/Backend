@@ -32,12 +32,22 @@ def create_hobby(current_user):
         'name': payload['name'],
         'user_id': current_user['_id']
     }
+    if Language().db.find_one({'user_id': current_user['_id'], 'name': payload['name']}):
+        return flask.jsonify({
+            'error': 'Bad request',
+            'message': 'Hobby already exist for the user'
+        }), 400
     h=Hobby().create_hobby(**payload)
     return h, 201
 
 @app.route('/hobbies/<id>', methods=['DELETE'])
 @token_required
 def delete_hobby(current_user, id):
+    if not Hobby().db.find_one({'_id': id}):
+        return {
+            'error': 'Bad request',
+            'message': 'No hobby with that id'
+        }, 404
     Hobby().delete_hobby(id)
     return '', 204
 
