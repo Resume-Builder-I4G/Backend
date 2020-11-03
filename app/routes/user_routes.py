@@ -22,8 +22,9 @@ def get_user(current_user):
 @token_required
 def update_user(current_user):
     data = dict(flask.request.form)
-    avatar_name = save_pic(flask.request.files['avatar'])
-    if type(avatar_name) == dict and 'error' in avatar_name:
+    avatar_name = save_pic(flask.request.files['avatar']) \
+            if flask.request.files['avatar'] else None
+    if type(avatar_name) == dict and 'error' in avatar_name or not avatar:
         return {
             'error': 'Bad request',
             'message': avatar_name['message']
@@ -38,64 +39,11 @@ def update_user(current_user):
 def home():
     return flask.redirect('https://www.postman.com/collections/11d9c8bcd44db2b4040c')
 
-@app.route('/users')
-def users():
-    return flask.jsonify(User().get_users())
-
 @app.route('/confirm', methods=['POST'])
 @token_required
 def confirm_account(current_user):
     user = User().update_profile(current_user['_id'], {'is_confirmed': True})
     return user, 201
-
-@app.route('/reset_password/<token>', methods=['POST'])
-def reset_password(token):
-    head = flask.request.headers.get('Authorization', None)
-    if head:
-        return {
-            'error':'Forbidden',
-            'message': 'You are signed in, you can\'t perform that operation'
-        }, 403
-    user = User().verify_reset_token(token)
-    if not user:
-        return {
-            'error': 'Bad request',
-            'message': 'Token is invalid'
-        }, 400
-    data = flask.request.get_json()
-    if data['password'] != data['confirm password']:
-        return {
-            'error': 'Bad request',
-            'message': 'Invalid data'
-        }, 400
-    user = User().update_profile(current_user['_id'],
-                {'password_hash': generate_password_hash(data['password'])}
-            )
-
-    return '', 201
-
-@app.route('/get_password_token', methods=['POST'])
-def get_token():
-    head = flask.request.headers.get('Authorization', None)
-    print(head)
-    if head:
-        return {
-            'error':'Forbidden',
-            'message': 'You are signed in, you can\'t perform that operation'
-        }, 403
-    data = flask.request.get_json()
-    if 'email' not in data:
-        return {
-            'error': 'Invalid request',
-            'message': 'Email not given'
-        }, 400
-    user = User().db.find_one({'email': data['email']})
-    if not user:
-        return {
-            'error': 'Invalid request',
-            'message': 'Invalid Email'
-        }, 400
-    return {'token': User().get_reset_token(user), 'user': user}, 200
 
 @app.route('/templates', methods=['POST'])
 @token_required

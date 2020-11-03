@@ -8,6 +8,10 @@ MONGODB_URI = os.environ.get('MONGODB_URI')
 
 app = flask.Flask(__name__)
 app.config['SECRET_KEY']=os.environ.get('SECRET_KEY')
+app.config['MAIL_USERNAME']=os.environ.get('MAIL_USERNAME')
+app.config['MAIL_PASSWORD']=os.environ.get('MAIL_PASSWORD')
+app.config['MAIL_SERVER']=os.environ.get('MAIL_SERVER')
+app.config['MAIL_PORT']=os.environ.get('MAIL_PORT')
 mongo =MongoClient(MONGODB_URI)
 db = mongo.resume
 
