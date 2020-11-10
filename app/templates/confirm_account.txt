@@ -1,0 +1,7 @@
+Hello {{user.name}},
+
+Welcome to I4G Resume Builder, we're glad to have you onboard
+Click {{url_for('confirm_account', current_user=user, _external=True)}} to confirm your account.
+
+Admin
+I4G
