@@ -27,19 +27,18 @@ def signup():
             'message': 'email already taken.'
         }), 400
     u=User().signup(**user)
-    msg = f"""From: From Person <{app.config['MAIL_USERNAME']}>
-To: To {payload['name']} <{payload['email']}>
-MIME-Version: 1.0
-Content-type: text/html
-Subject: Welcome to Resume Builder I4G
-
-<h1>Hello {payload['name']}</h1>,
-Welcome to I4G Resume Builder, we're glad to have you onboard
-Click <a href='{flask.url_for('confirm_account', current_user=u, _external=True)}>here</a> to confirm your account
-Admin
-I4G
-"""
-    send_mail(payload['email'], msg, 'Welcome to I4G')
+    msg = flask.render_template('confirm_account.txt', 
+                                user=user,
+                                sender=app.config['MAIL_USERNAME'])
+    msg_html = flask.render_template('confirm_account.html', 
+                                user=u,
+                                sender=app.config['MAIL_USERNAME'])
+    mail=send_mail('Welcome to Resume Builder I4G', payload['email'], msg, msg_html)
+    if mail:
+        return {
+            'error': 'Server error',
+            'message': mail
+        }, 500
     return u, 201
 
 @app.route('/auth/signin', methods=['POST'])
@@ -96,7 +95,6 @@ def reset_password(token):
 @app.route('/get_password_token', methods=['POST'])
 def get_token():
     head = flask.request.headers.get('Authorization', None)
-    print(head)
     if head:
         return {
             'error':'Forbidden',
@@ -114,17 +112,18 @@ def get_token():
             'error': 'Invalid request',
             'message': 'Invalid Email'
         }, 400
-    msg = f"""From: From Person <{app.config['MAIL_USERNAME']}>
-To: To {user['name']} <{data['email']}>
-MIME-Version: 1.0
-Content-type: text/html
-Subject: Welcome to Resume Builder I4G
-
-<h1>Hello {user['name']}</h1>,
-Welcome to I4G Resume Builder, we're glad to have you onboard
-Click <a href='{flask.url_for('reset_password', token=User().get_reset_token(user), _external=True)}>here</a> to reset your password
-Admin
-I4G
-"""
-    mail = send_mail(data['email'], msg, 'Reset Your Password')
+    msg = flask.render_template('reset_password.txt', 
+                                token=User().get_reset_token(user),
+                                sender=app.config['MAIL_USERNAME'], 
+                                user=user)
+    msg_html = flask.render_template('reset_password.html', 
+                                token=User().get_reset_token(user),
+                                sender=app.config['MAIL_USERNAME'], 
+                                user=user)
+    mail = send_mail('Reset Your password', data['email'], msg, msg_html)
+    if mail:
+        return {
+            'error': 'Server error',
+            'message': mail
+        }, 500
     return {'message': 'Mail sent successfully', 'user': user}, 200

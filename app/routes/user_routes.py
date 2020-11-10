@@ -29,7 +29,8 @@ def update_user(current_user):
             'error': 'Bad request',
             'message': avatar_name['message']
         }, 400
-    data['image_path'] = flask.request.host_url+'static/'+avatar_name
+    if avatar_name is not None:
+        data['image_path'] = flask.request.host_url+'static/'+avatar_name
     User().update_profile(current_user['_id'], **data)
     return flask.redirect(
         flask.url_for('get_user', current_user=current_user)

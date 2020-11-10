@@ -23,7 +23,7 @@
             If email exist:
                 error: string
                 message: string
-                status code: 403
+                status code: 400
             if email doesn't exist:
                 user details, status code:200
         You receive a welcome mail
@@ -38,7 +38,7 @@
             if email is not registered:
                 error: string
                 message: string
-                status code:403
+                status code:400
     /get_password_token -- POST
         Request:
             JSON body:

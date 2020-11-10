@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirm Your Account</title>
+</head>
+<body>
+    <h1>Hello {{user.name}}</h1>,
+    
+    Welcome to I4G Resume Builder, we're glad to have you onboard
+    Click <a href="{{url_for('confirm_account', current_user=user, _external=True)}}">here</a> to confirm your account.
+
+    Admin
+    I4G
+</body>
+</html>
