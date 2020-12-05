@@ -1,10 +1,14 @@
 '''Module that handles view of everything that has to do with CRUD of the user'''
 from app import app
-from app.models import *
+from ..models import *
 import flask
 from werkzeug.security import generate_password_hash
-from app.routes import token_required
-from app.routes.image_saver import save_pic
+from xhtml2pdf import pisa
+from io import StringIO
+from . import token_required
+from .image_saver import save_pic
+from .mail_routes import send_mail
+from .htmltopdf import render_pdf
 
 @app.route('/user')
 @token_required
@@ -43,7 +47,7 @@ def home():
 @app.route('/confirm', methods=['POST'])
 @token_required
 def confirm_account(current_user):
-    user = User().update_profile(current_user['_id'], {'is_confirmed': True})
+    user = User().update_profile(current_user['_id'], **{'is_confirmed': True})
     return user, 201
 
 @app.route('/templates', methods=['POST'])
@@ -56,4 +60,47 @@ def template(current_user):
             'message': 'Template not given'
         }, 400
     User().update_profile(current_user['_id'], {'template': template})
-    
+
+@app.route('/plans')
+def plans():
+    return 'In Progress'
+
+
+@app.route('/pdf-mail', methods=['POST'])
+@token_required
+def pdf_mail(current_user):
+    name=f"{current_user['name'].replace(' ', '-')}.pdf"
+    pdf_template=flask.request.files['pdf']
+    pdf = render_pdf(str(pdf_template.read(), encoding='utf-8'), name)
+    print(pdf)
+    response = flask.send_file(pdf, 
+                attachment_filename=name, 
+                mimetype='application/pdf'
+            )    
+    try: 
+        msg = flask.render_template('pdf_mail.txt')
+        msg_html = flask.render_template('pdf_mail.html')
+        mail = send_mail('Here\'s The Resume You Requested For  -- I4G', 
+                        current_user.email, 
+                        msg, 
+                        msg_html, 
+                        pdf_attachment=response, 
+                        pdf_name=name)
+        return {
+            'message': 'Email sent successfully'
+        }
+    except Exception as e: 
+        return {'error': e}, 500    
+
+@app.route('/pdf', methods=['POST'])
+@token_required
+def pdf_(current_user):
+    name=f"{current_user['name'].replace(' ', '-')}.pdf"
+    pdf_template=flask.request.files['pdf']
+    pdf = render_pdf(str(pdf_template.read(), encoding='utf-8'), name)
+    print(pdf)
+    response = flask.send_file(pdf, 
+                attachment_filename=name, 
+                mimetype='application/pdf'
+            )
+    return response
