@@ -1,3 +1,4 @@
+'''Module that defines all the db attributes and helper methods'''
 import os, datetime, uuid
 from itsdangerous import TimedJSONWebSignatureSerializer as Serializer
 from werkzeug.security import generate_password_hash, check_password_hash

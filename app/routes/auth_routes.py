@@ -39,7 +39,10 @@ def signup():
             'error': 'Server error',
             'message': mail
         }, 500
-    return u, 201
+    return {
+        'message': 'Mail has been successfully sent to your mail for confirming your account',
+        'user': u
+    }, 201
 
 @app.route('/auth/signin', methods=['POST'])
 def signin():
@@ -62,7 +65,7 @@ def signin():
 
     token = jwt.encode({'user': u}, app.config['SECRET_KEY'])
     return flask.jsonify({
-        'token': token,
+        'token': token.decode('utf-8'),
         'user': u
     }), 200
 

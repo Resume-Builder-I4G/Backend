@@ -1,0 +1,9 @@
+Here's the resume you requested!
+Hey {{user.name}},
+
+Attached you will find your Enhancv resume.
+
+Unlock all power features and give your resume a power boost! Try our quarterly PRO plan.
+
+Click {{url_for('plans', _external=True)}} to see SEE ENHANCV PLANS ENHANCV PLANS
+
